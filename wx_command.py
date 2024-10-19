@@ -148,6 +148,6 @@ def remote_forward(msg):
     """转发消息"""
     forward_groups = []
     for group in msg.bot.forward_groups:
-        msg.forward(group, suffix='猪哥转发')
+        msg.forward(group, suffix='')
         forward_groups.append(group.name)
     return forward_groups

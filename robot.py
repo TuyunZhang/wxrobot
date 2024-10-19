@@ -41,6 +41,10 @@ def group_msg(msg):
     # 群@转发功能
     if msg.is_at and msg.bot.is_forward_group_at_msg:
         msg.forward(msg.bot.master, prefix='「{0}」在群「{1}」中艾特了你：'.format(msg.member.name, msg.chat.name))
+    elif msg.chat.name == msg.bot.master_group.name:
+        wx_command.remote_forward(msg)
+    # 检查消息是否@了机器人
+    # msg.is_at 是一个布尔值，表示消息是否包含@机器人的标
 
     if msg.type == TEXT:
         # 群回复
@@ -61,6 +65,9 @@ def group_msg(msg):
     if msg.bot.is_listen_friend and msg.chat in msg.bot.listen_friend_groups and msg.member.is_friend in msg.bot.listen_friends:
         msg.forward(msg.bot.master, prefix='监听指定好友群消息：「{0}」在「{1}」发了消息：'.format(msg.member.is_friend.remark_name or msg.member.nick_name, msg.chat.name))
     return None
+
+
+
 
 
 @bot.register(msg_types=NOTE)

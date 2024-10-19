@@ -35,6 +35,8 @@ def load_config_to_bot(bot):
     load_listen_friend(bot)
     load_forward_groups(bot)
     load_listen_sharing_groups(bot)
+    # 加载机器人主人群 | 修改时间: 2023年10月15日 | 修改人: sunnyzhang | 修改目的: 添加对机器人主人群的加载功能
+    load_master_group(bot)
     # 发送机器人状态信息
     bot_status = bot_status if '文件助手' in bot_status else bot_status + bot_status_detail(bot)
     bot.master.send(bot_status)
@@ -61,12 +63,17 @@ def load_listen_friend(bot):
 def load_forward_groups(bot):
     """加载需要转发的群"""
     if bot.is_forward_mode:
-        bot.forward_groups = bot.groups().search(config.forward_groups)
+        bot.forward_groups = []
+        for group_name in config.forward_groups:
+            group = bot.groups().search(group_name)
+            if group:
+                bot.forward_groups += group
         if len(bot.forward_groups) < 1:
             bot.forward_groups = []
             bot.is_forward_mode = False
             return '未找到群名包含「{}」的转发群！'.format(config.forward_groups)
     return None
+
 
 
 def load_listen_sharing_groups(bot):
@@ -133,3 +140,31 @@ def search_friends(bot, names):
         elif getattr(friend, 'nick_name', None) in split_names:
             result_list.append(friend)
     return result_list
+
+
+def load_master_group(bot):
+    """
+    加载机器人主人群
+
+    该函数用于根据配置文件中的群名称加载机器人主人群。
+    如果在群列表中找到匹配的群，则将其设置为机器人的主人群。
+    否则，返回相应的错误信息。
+
+    参数:
+    bot (Bot): 机器人实例
+
+    返回:
+    str: 描述加载结果的字符串信息
+    """
+    if config.master_group_name:
+        master_group = bot.groups().search(config.master_group_name)
+        if master_group:
+            bot.master_group = master_group[0]
+            return '机器人主人群已设置为：「{}」'.format(config.master_group_name)
+        else:
+            bot.master_group = None
+            return '未找到群名为「{}」的主人群！'.format(config.master_group_name)
+    else:
+        bot.master_group = None
+        return '未设置机器人主人群名称！'
+
