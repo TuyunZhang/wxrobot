@@ -9,6 +9,9 @@ is_group_reply = False  # 此项表示群中是否回复
 is_group_at_reply = False  # 上一项开启后此项才生效
 is_forward_revoke_msg = False  # 开启防撤回模式
 is_forward_group_at_msg = False  # 转发群@我的消息
+# 控制是否转发主人群的消息
+is_forward_master_group_msg = True
+
 
 # 机器人主人
 bot_master_name = '张广军'  # 使用备注名更安全，只允许一个，可远程控制机器人，如果不设置(空)则将文件助手设置为管理员，但不具备远程控制功能
@@ -16,7 +19,7 @@ bot_master_name = '张广军'  # 使用备注名更安全，只允许一个，�
 # 监听某些好友群聊，如老板
 is_listen_friend = False
 listen_friend_names = ''  # 需要监听的人名称，使用备注名更安全，允许多个用|分隔，如：主管|项目经理|产品狗
-listen_friend_groups = 'Python新手交流'  # 在这些群里监听好友说的话，匹配模式：包含“唯一集团工作群”的群
+listen_friend_groups = ''  # 在这些群里监听好友说的话，匹配模式：包含“唯一集团工作群”的群
 
 
 # 转发信息至群
@@ -36,5 +39,10 @@ master_group_name = "测试群2"  # 机器人主人群的ID,请将"群ID"替换�
 
 # 如果需要支持多个主人群,可以使用以下格式:
 # master_group_name = ["群ID1", "群ID2", "群ID3"]  # 机器人主人群的ID列表
+# 定义主人群和对应的转发群清单，其中键表示主人群，值是一个列表，包含需要将主人群消息转发到的其他群。
+master_group_forward_map = {
+    "测试群2": ["测试群1", "有机生活一起享","测试群4","测试群5"],
+    "测试群3": ["测试群4", "测试群5","测试群1"]
+}
 
 

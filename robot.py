@@ -39,10 +39,19 @@ def friend_msg(msg):
 def group_msg(msg):
     """接收群消息"""
     # 群@转发功能
-    if msg.is_at and msg.bot.is_forward_group_at_msg:
+    if msg.is_at and msg.chat in msg.bot.master_groups:
+        if "关闭转发模式" in msg.text and msg.bot.is_forward_master_group_msg:
+            msg.bot.is_forward_master_group_msg = False
+            msg.reply('已经关闭本群的转发模式...')
+            return
+        elif "开启转发模式" in msg.text and msg.bot.is_forward_master_group_msg == False:
+             msg.bot.is_forward_master_group_msg = True
+             msg.reply('已经打开本群的转发模式...')
+             return
+    elif msg.chat in msg.bot.master_groups and msg.bot.is_forward_master_group_msg:
+        wx_command.forward_master_group_msg(msg)
+    elif msg.is_at and msg.bot.is_forward_group_at_msg:
         msg.forward(msg.bot.master, prefix='「{0}」在群「{1}」中艾特了你：'.format(msg.member.name, msg.chat.name))
-    elif msg.chat.name == msg.bot.master_group.name:
-        wx_command.remote_forward(msg)
     # 检查消息是否@了机器人
     # msg.is_at 是一个布尔值，表示消息是否包含@机器人的标
 

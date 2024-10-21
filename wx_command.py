@@ -151,3 +151,25 @@ def remote_forward(msg):
         msg.forward(group, suffix='')
         forward_groups.append(group.name)
     return forward_groups
+
+def forward_master_group_msg(msg):
+    """
+    转发主人群消息到对应的转发群
+
+    当收到来自主人群的消息时，将该消息转发到与该主人群关联的所有转发群中。
+    
+    参数:
+    msg (Message): 接收到的消息对象
+
+    返回:
+    list: 包含所有成功转发到的群名称的列表
+
+    修改人: Assistant
+    修改时间: 2023-10-21
+    """
+    forward_groups = []
+    if msg.chat in msg.bot.master_groups:
+        for group in msg.bot.forward_groups.get(msg.chat, []):
+            msg.forward(group, suffix='')
+            forward_groups.append(group.name)
+    return forward_groups

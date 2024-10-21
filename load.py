@@ -31,12 +31,14 @@ def load_config_to_bot(bot):
     bot.is_listen_sharing = config.is_listen_sharing
     bot.is_forward_revoke_msg = config.is_forward_revoke_msg
     bot.is_forward_group_at_msg = config.is_forward_group_at_msg
+    #sunnyzhang 20241021 增加主人群转发开关
+    bot.is_forward_master_group_msg = config.is_forward_master_group_msg
     # 加载对应好友和群
     load_listen_friend(bot)
     load_forward_groups(bot)
     load_listen_sharing_groups(bot)
     # 加载机器人主人群 | 修改时间: 2023年10月15日 | 修改人: sunnyzhang | 修改目的: 添加对机器人主人群的加载功能
-    load_master_group(bot)
+    load_master_group_map(bot)
     # 发送机器人状态信息
     bot_status = bot_status if '文件助手' in bot_status else bot_status + bot_status_detail(bot)
     bot.master.send(bot_status)
@@ -142,11 +144,11 @@ def search_friends(bot, names):
     return result_list
 
 
-def load_master_group(bot):
+def load_master_group_map(bot):
     """
-    加载机器人主人群
+    加载机器人主人群以及对应的转发群
 
-    该函数用于根据配置文件中的群名称加载机器人主人群。
+    该函数用于根据配置文件中的master_group_forward_map变量加载机器人主人群。
     如果在群列表中找到匹配的群，则将其设置为机器人的主人群。
     否则，返回相应的错误信息。
 
@@ -155,16 +157,32 @@ def load_master_group(bot):
 
     返回:
     str: 描述加载结果的字符串信息
+
+    修改人: sunnyzhang
+    修改时间: 2024-10-21
     """
-    if config.master_group_name:
-        master_group = bot.groups().search(config.master_group_name)
-        if master_group:
-            bot.master_group = master_group[0]
-            return '机器人主人群已设置为：「{}」'.format(config.master_group_name)
+    bot.master_groups = []
+    bot.forward_groups = {}
+    if hasattr(config, 'master_group_forward_map'):
+        for master_group_name, forward_group_names in config.master_group_forward_map.items():
+            master_group = bot.groups().search(master_group_name)
+            if master_group:
+                master_group = master_group[0]
+                bot.master_groups.append(master_group)
+                bot.forward_groups[master_group] = []
+                for forward_group_name in forward_group_names:
+                    forward_group = bot.groups().search(forward_group_name)
+                    if forward_group:
+                        bot.forward_groups[master_group].append(forward_group[0])
+        
+        if bot.master_groups:
+            result = '机器人主人群已设置为：「{}」'.format('、'.join([group.name for group in bot.master_groups]))
+            result += '\n对应的转发群设置如下：'
+            for master_group, forward_groups in bot.forward_groups.items():
+                result += '\n主人群「{}」对应的转发群：「{}」'.format(master_group.name, '、'.join([group.name for group in forward_groups]))
+            return result
         else:
-            bot.master_group = None
-            return '未找到群名为「{}」的主人群！'.format(config.master_group_name)
+            return '未找到配置中指定的任何主人群！'
     else:
-        bot.master_group = None
-        return '未设置机器人主人群名称！'
+        return '未在配置文件中找到master_group_forward_map变量！'
 
